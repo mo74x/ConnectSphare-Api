@@ -1,6 +1,5 @@
 import Post from "../models/post.models.js";
 
-
 // create New Post
 const createPost = async (req, res) => {
     const { content } = req.body;
@@ -51,5 +50,34 @@ const deletePost = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };  
+// like post or unlike
+const likePost = async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id);
+  
+      if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+      }
+  
+      // Check if the post has already been liked by this user
+      const isLiked = post.likes.includes(req.user.id);
+  
+      if (isLiked) {
+        // --- Unlike the post ---
+        post.likes = post.likes.filter(
+          (userId) => userId.toString() !== req.user.id
+        );
+      } else {
+        // --- Like the post ---
+        post.likes.push(req.user.id);
+      }
+  
+      await post.save();
+      res.json({ message: 'Post like status updated', likes: post.likes });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
 //
-export{deletePost,getPosts,createPost};
+export{deletePost,getPosts,createPost,likePost};
