@@ -1,4 +1,5 @@
 import Post from "../models/post.models.js";
+import Comment from "../models/comment.models.js";
 
 // create New Post
 const createPost = async (req, res) => {
@@ -79,5 +80,40 @@ const likePost = async (req, res) => {
     }
   };
 
-//
-export{deletePost,getPosts,createPost,likePost};
+//lets create the comments 
+const createCommentOnPost = async (req, res) => {
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ message: 'Comment text is required' });
+    }
+  
+    try {
+      const post = await Post.findById(req.params.id);
+      if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+      }
+  
+      const comment = await Comment.create({
+        text,
+        author: req.user.id,
+        post: req.params.id
+      });
+  
+      res.status(201).json(comment);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+ //get all comment for post 
+ const getCommentsForPost = async (req, res) => {
+    try {
+      const comments = await Comment.find({ post: req.params.id })
+        .populate('author', 'username')
+        .sort({ createdAt: 'asc' }); // Oldest comments first
+  
+      res.json(comments);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }; 
+export{deletePost,getPosts,createPost,likePost,getCommentsForPost,createCommentOnPost};

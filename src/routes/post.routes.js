@@ -1,11 +1,20 @@
 import express from 'express';
-import { getPosts,deletePost,createPost ,likePost} from '../controllers/post.controller.js';
+import { getPosts,deletePost,createPost ,likePost,createCommentOnPost,getCommentsForPost} from '../controllers/post.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
 const router=express.Router();
 
-router.post('/',protect,createPost);
-router.get('/',getPosts);
-router.delete('/:id',protect,deletePost);
+router.route('/')
+  .post(protect, createPost)
+  .get(getPosts);
+
+router.route('/:id')
+  .delete(protect, deletePost);
+
 router.post('/:id/like', protect, likePost);
+
+
+router.route('/:id/comments')
+  .post(protect, createCommentOnPost)
+  .get(getCommentsForPost);
 
 export default router;
